@@ -61,15 +61,14 @@ Add the new option to the dropdown in src/components/ControlsPanel.tsx.
 Wire it up in the processImageData switch in src/utils/imageProcessing.ts.
 
 ## 📁 Project Structure
-text
-src/
-├── components/       # React components (uploader, preview, controls)
-├── types/            # TypeScript interfaces and types
-├── utils/            # Image processing and dithering logic
-├── App.tsx           # Main application component
-├── App.css           # Main styles
-├── index.tsx         # Entry point
-└── index.css         # Global styles
+src/<br>
+├── components/       # React components (uploader, preview, controls)<br>
+├── types/            # TypeScript interfaces and types<br>
+├── utils/            # Image processing and dithering logic<br>
+├── App.tsx           # Main application component<br>
+├── App.css           # Main styles<br>
+├── index.tsx         # Entry point<br>
+└── index.css         # Global styles<br>
 
 ## 🤝 Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests for new features, bug fixes, or performance improvements.
