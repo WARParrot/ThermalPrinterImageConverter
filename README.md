@@ -28,8 +28,8 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/thermalizer.git
-cd thermalizer
+git clone https://github.com/WARParrot/ThermalPrinterConverter
+cd ThermalPrinterConverter
 
 # Install dependencies
 npm install
