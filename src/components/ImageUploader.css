@@ -1,0 +1,37 @@
+.upload-area {
+  background: #ffffffd6;
+  border: 2px dashed #94a3b8;
+  border-radius: 24px;
+  padding: 32px 20px;
+  text-align: center;
+  transition: all 0.2s;
+  margin-bottom: 28px;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  border-color: #3b82f6;
+  background: #ffffffec;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.1);
+}
+
+.upload-area.dragging {
+  border-color: #3b82f6;
+  background: #e0f2fe;
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.2);
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.upload-text {
+  font-weight: 500;
+}
+
+.upload-hint {
+  font-size: 0.8rem;
+  margin-top: 6px;
+  color: #64748b;
+}
