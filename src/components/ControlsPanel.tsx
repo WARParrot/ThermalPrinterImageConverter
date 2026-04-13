@@ -19,7 +19,17 @@ const ControlsPanel = ({
   onDownload,
   isProcessing,
   downloadDisabled,
-  processDisabled
+  processDisabled,
+  isPrinterConnected,
+  isPrinting,
+  onPrint,
+  printError,
+  resizeMode,
+  setResizeMode,
+  targetWidth,
+  setTargetWidth,
+  targetHeight,
+  setTargetHeight,
 }: ControlsPanelProps) => {
   return (
     <div className="controls-panel">
@@ -88,6 +98,53 @@ const ControlsPanel = ({
         />
       </div>
 
+      {/* New Resize Controls */}
+      <div className="control-group">
+        <label>Image Size</label>
+        <select value={resizeMode} onChange={(e) => setResizeMode(e.target.value as typeof resizeMode)}>
+          <option value="original">Original</option>
+          <option value="fitWidth">Fit to Width</option>
+          <option value="fitHeight">Fit to Height</option>
+          <option value="exact">Exact Dimensions</option>
+        </select>
+      </div>
+
+      {resizeMode !== 'original' && (
+  <>
+    {(resizeMode === 'fitWidth' || resizeMode === 'exact') && (
+      <div className="control-group">
+        <label>Target Width (px)</label>
+        <input
+          type="number"
+          min="1"
+          max="2000"
+          step="1"
+          value={targetWidth}
+          onChange={(e) => setTargetWidth(parseInt(e.target.value, 10) || 384)}
+        />
+      </div>
+    )}
+    {(resizeMode === 'fitHeight' || resizeMode === 'exact') && (
+      <div className="control-group">
+        <label>Target Height (px)</label>
+        <input
+          type="number"
+          min="1"
+          max="2000"
+          step="1"
+          value={targetHeight}
+          onChange={(e) => setTargetHeight(parseInt(e.target.value, 10) || 384)}
+        />
+      </div>
+    )}
+    <div className="slider-value" style={{ marginTop: 4, fontSize: '0.8rem', color: '#64748b' }}>
+      {resizeMode === 'fitWidth' && 'Height calculated automatically (preserves aspect ratio)'}
+      {resizeMode === 'fitHeight' && 'Width calculated automatically (preserves aspect ratio)'}
+      {resizeMode === 'exact' && 'Image will be stretched to exact dimensions'}
+    </div>
+  </>
+)}
+
       <div className="control-group checkbox-group">
         <label>Invert colors</label>
         <input
@@ -109,17 +166,36 @@ const ControlsPanel = ({
           {isProcessing ? 'Processing...' : 'Process'}
         </button>
       </div>
-      
+
       <div className="button-group" style={{ marginTop: 12 }}>
         <button
           className="btn btn-primary"
           onClick={onDownload}
           disabled={downloadDisabled}
-          style={{ background: downloadDisabled ? '#94a3b8' : '#1e293b' }}
         >
           Download
         </button>
       </div>
+
+      <div className="button-group" style={{ marginTop: 12 }}>
+        <button
+          className="btn btn-primary"
+          onClick={onPrint}
+          disabled={!isPrinterConnected || isPrinting}
+          style={{
+            background: isPrinterConnected ? '#22c55e' : '#94a3b8',
+            borderColor: isPrinterConnected ? '#22c55e' : '#94a3b8',
+          }}
+        >
+          {isPrinting ? 'Printing...' : isPrinterConnected ? '🖨️ Print' : '🔌 Connect Printer'}
+        </button>
+      </div>
+
+      {printError && (
+        <div className="print-error" style={{ marginTop: 8, color: '#ef4444', fontSize: '0.85rem' }}>
+          {printError}
+        </div>
+      )}
 
       {isProcessing && (
         <div className="processing-indicator">Rendering image, please wait...</div>

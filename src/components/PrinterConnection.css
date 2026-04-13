@@ -1,0 +1,95 @@
+/* src/components/PrinterConnection.css */
+.printer-connection {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.status-indicator.connected {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.status-text {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.connection-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.connection-controls select {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  background: white;
+  font-size: 0.95rem;
+}
+
+.btn-connect, .btn-disconnect {
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+
+.btn-connect {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-connect:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btn-connect:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-disconnect {
+  background: #ef4444;
+  color: white;
+  width: 100%;
+}
+
+.btn-disconnect:hover {
+  background: #dc2626;
+}
+
+.connection-error {
+  margin-top: 12px;
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
+.browser-warning {
+  margin-top: 12px;
+  padding: 10px;
+  background: #fef3c7;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.9rem;
+}

@@ -3,13 +3,19 @@ import './App.css';
 import ImageUploader from './components/ImageUploader';
 import ImagePreview from './components/ImagePreview';
 import ControlsPanel from './components/ControlsPanel';
+import PrinterConnection from './components/PrinterConnection';
 import { processImageData } from './utils/imageProcessing';
-import type { ProcessingOptions } from './types';
+import { printService } from './services/printService';
+import type { ProcessingOptions, ResizeMode } from './types';
 
 const App = () => {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
   const [processedImageURL, setProcessedImageURL] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [isPrinterConnected, setIsPrinterConnected] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [printError, setPrintError] = useState<string | null>(null);
 
   const [algorithm, setAlgorithm] = useState<ProcessingOptions['algorithm']>('floyd');
   const [brightness, setBrightness] = useState(0);
@@ -17,17 +23,45 @@ const App = () => {
   const [threshold, setThreshold] = useState(128);
   const [bayerSize, setBayerSize] = useState<ProcessingOptions['bayerSize']>(4);
   const [invert, setInvert] = useState(false);
+  
+  // New resize state
+  const [resizeMode, setResizeMode] = useState<ResizeMode>('original');
+  const [targetWidth, setTargetWidth] = useState<number>(384); // 80mm at 8dpmm
+  const [targetHeight, setTargetHeight] = useState<number>(384);
 
   const originalCanvasRef = useRef<HTMLCanvasElement>(null);
   const processedCanvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Flag to track if original canvas is ready (drawn with image)
   const [isCanvasReady, setIsCanvasReady] = useState(false);
+
+  const handlePrint = useCallback(async () => {
+    const procCanvas = processedCanvasRef.current;
+    if (!procCanvas) {
+      setPrintError('No processed image to print');
+      return;
+    }
+
+    if (!isPrinterConnected) {
+      setPrintError('Please connect a printer first');
+      return;
+    }
+
+    setIsPrinting(true);
+    setPrintError(null);
+
+    try {
+      await printService.printImage(procCanvas);
+    } catch (error) {
+      console.error('Print failed:', error);
+      setPrintError(error instanceof Error ? error.message : 'Print failed');
+    } finally {
+      setIsPrinting(false);
+    }
+  }, [isPrinterConnected]);
 
   const handleImageLoaded = useCallback((img: HTMLImageElement) => {
     setOriginalImage(img);
     setProcessedImageURL(null);
-    setIsCanvasReady(false); // Reset until drawn
+    setIsCanvasReady(false);
 
     const canvas = originalCanvasRef.current;
     if (!canvas) {
@@ -41,14 +75,11 @@ const App = () => {
       return;
     }
 
-    // Set canvas dimensions and draw image
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
 
-    // Verify drawing succeeded
     try {
-      // Quick check: read a pixel to ensure canvas is not tainted
       ctx.getImageData(0, 0, 1, 1);
       setIsCanvasReady(true);
       console.log(`Image loaded and drawn: ${img.width}x${img.height}`);
@@ -61,8 +92,6 @@ const App = () => {
   const handleProcess = useCallback(() => {
     const origCanvas = originalCanvasRef.current;
     const procCanvas = processedCanvasRef.current;
-
-    console.log('Process clicked. origCanvas:', origCanvas, 'procCanvas:', procCanvas, 'isCanvasReady:', isCanvasReady);
 
     if (!origCanvas || !procCanvas) {
       alert('Canvas elements not found. Please try re-uploading the image.');
@@ -89,7 +118,6 @@ const App = () => {
         }
 
         const imageData = ctx.getImageData(0, 0, origCanvas.width, origCanvas.height);
-        console.log('Image data obtained:', imageData.width, imageData.height);
 
         const options: ProcessingOptions = {
           algorithm,
@@ -97,7 +125,10 @@ const App = () => {
           contrast,
           threshold,
           bayerSize,
-          invert
+          invert,
+          resizeMode,
+          targetWidth,
+          targetHeight
         };
 
         const processedData = processImageData(imageData, options);
@@ -119,7 +150,7 @@ const App = () => {
         setIsProcessing(false);
       }
     }, 10);
-  }, [algorithm, brightness, contrast, threshold, bayerSize, invert, isCanvasReady]);
+  }, [algorithm, brightness, contrast, threshold, bayerSize, invert, resizeMode, targetWidth, isCanvasReady]);
 
   const handleDownload = () => {
     if (!processedImageURL) return;
@@ -136,6 +167,9 @@ const App = () => {
     setAlgorithm('floyd');
     setBayerSize(4);
     setInvert(false);
+    setResizeMode('original');
+    setTargetWidth(384);
+    setTargetHeight(384);
     setProcessedImageURL(null);
   };
 
@@ -150,6 +184,7 @@ const App = () => {
       </div>
 
       <ImageUploader onImageLoaded={handleImageLoaded} />
+      <PrinterConnection onConnectionChange={setIsPrinterConnected} />
 
       <div className="main-panels">
         <ImagePreview
@@ -186,6 +221,16 @@ const App = () => {
           isProcessing={isProcessing}
           downloadDisabled={!processedImageURL || isProcessing}
           processDisabled={!originalImage || isProcessing}
+          isPrinterConnected={isPrinterConnected}
+          isPrinting={isPrinting}
+          onPrint={handlePrint}
+          printError={printError}
+          resizeMode={resizeMode}
+          setResizeMode={setResizeMode}
+          targetWidth={targetWidth}
+          setTargetWidth={setTargetWidth}
+          targetHeight={targetHeight}
+          setTargetHeight={setTargetHeight}
         />
       </div>
 

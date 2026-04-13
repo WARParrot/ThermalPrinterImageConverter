@@ -1,3 +1,5 @@
+export type ResizeMode = 'original' | 'fitWidth' | 'fitHeight' | 'exact';
+
 export interface ProcessingOptions {
   algorithm: 'floyd' | 'atkinson' | 'ordered' | 'threshold';
   brightness: number;
@@ -5,6 +7,9 @@ export interface ProcessingOptions {
   threshold: number;
   bayerSize: 2 | 4 | 8;
   invert: boolean;
+  resizeMode: ResizeMode;
+  targetWidth: number;
+  targetHeight: number;
 }
 
 export interface ImageUploaderProps {
@@ -38,4 +43,17 @@ export interface ControlsPanelProps {
   isProcessing: boolean;
   downloadDisabled: boolean;
   processDisabled: boolean;
+  // Print props
+  isPrinterConnected: boolean;
+  isPrinting: boolean;
+  onPrint: () => void;
+  printError: string | null;
+  // Resize props
+  resizeMode: ResizeMode;
+  setResizeMode: (value: ResizeMode) => void;
+  targetWidth: number;
+  setTargetWidth: (value: number) => void;
+  targetHeight: number;
+  setTargetHeight: (value: number) => void;
 }
+
