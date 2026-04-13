@@ -6,7 +6,7 @@ import ControlsPanel from './components/ControlsPanel';
 import PrinterConnection from './components/PrinterConnection';
 import { processImageData } from './utils/imageProcessing';
 import { printService } from './services/printService';
-import type { ProcessingOptions, ResizeMode } from './types';
+import type { ProcessingOptions, ResizeMode, SizeUnit } from './types';
 
 const App = () => {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
@@ -17,17 +17,19 @@ const App = () => {
   const [isPrinting, setIsPrinting] = useState(false);
   const [printError, setPrintError] = useState<string | null>(null);
 
+  // Image processing parameters
   const [algorithm, setAlgorithm] = useState<ProcessingOptions['algorithm']>('floyd');
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
   const [threshold, setThreshold] = useState(128);
   const [bayerSize, setBayerSize] = useState<ProcessingOptions['bayerSize']>(4);
   const [invert, setInvert] = useState(false);
-  
-  // New resize state
+
+  // Resize controls
   const [resizeMode, setResizeMode] = useState<ResizeMode>('original');
-  const [targetWidth, setTargetWidth] = useState<number>(384); // 80mm at 8dpmm
-  const [targetHeight, setTargetHeight] = useState<number>(384);
+  const [targetWidth, setTargetWidth] = useState<number>(384); // px
+  const [targetHeight, setTargetHeight] = useState<number>(384); // px
+  const [unit, setUnit] = useState<SizeUnit>('px');
 
   const originalCanvasRef = useRef<HTMLCanvasElement>(null);
   const processedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -128,7 +130,7 @@ const App = () => {
           invert,
           resizeMode,
           targetWidth,
-          targetHeight
+          targetHeight,
         };
 
         const processedData = processImageData(imageData, options);
@@ -150,7 +152,18 @@ const App = () => {
         setIsProcessing(false);
       }
     }, 10);
-  }, [algorithm, brightness, contrast, threshold, bayerSize, invert, resizeMode, targetWidth, isCanvasReady]);
+  }, [
+    algorithm,
+    brightness,
+    contrast,
+    threshold,
+    bayerSize,
+    invert,
+    resizeMode,
+    targetWidth,
+    targetHeight,
+    isCanvasReady,
+  ]);
 
   const handleDownload = () => {
     if (!processedImageURL) return;
@@ -170,13 +183,14 @@ const App = () => {
     setResizeMode('original');
     setTargetWidth(384);
     setTargetHeight(384);
+    setUnit('px');
     setProcessedImageURL(null);
   };
 
   return (
     <div className="app-container">
       <h1>
-        🖨️ Thermalizer
+        Thermalizer
         <small>advanced dithering</small>
       </h1>
       <div className="subtitle">
@@ -231,6 +245,8 @@ const App = () => {
           setTargetWidth={setTargetWidth}
           targetHeight={targetHeight}
           setTargetHeight={setTargetHeight}
+          unit={unit}
+          setUnit={setUnit}
         />
       </div>
 

@@ -1,5 +1,6 @@
-import './ControlsPanel.css';
+import { useSizeUnit } from '../hooks/useSizeUnit';
 import type { ControlsPanelProps } from '../types';
+import './ControlsPanel.css';
 
 const ControlsPanel = ({
   algorithm,
@@ -30,9 +31,15 @@ const ControlsPanel = ({
   setTargetWidth,
   targetHeight,
   setTargetHeight,
+  unit,
+  setUnit,
 }: ControlsPanelProps) => {
+  const { displayWidth, displayHeight, handleWidthChange, handleHeightChange } =
+    useSizeUnit({ unit, targetWidth, targetHeight, setTargetWidth, setTargetHeight });
+
   return (
     <div className="controls-panel">
+      {/* Dithering algorithm */}
       <div className="control-group">
         <label>Dithering algorithm</label>
         <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value as typeof algorithm)}>
@@ -45,9 +52,7 @@ const ControlsPanel = ({
 
       {algorithm === 'threshold' && (
         <div className="control-group">
-          <label>
-            Threshold level <span className="value-label">({threshold})</span>
-          </label>
+          <label>Threshold level <span className="value-label">({threshold})</span></label>
           <input
             type="range"
             min="0"
@@ -73,9 +78,7 @@ const ControlsPanel = ({
       )}
 
       <div className="control-group">
-        <label>
-          Brightness <span className="value-label">({brightness})</span>
-        </label>
+        <label>Brightness <span className="value-label">({brightness})</span></label>
         <input
           type="range"
           min="-100"
@@ -86,9 +89,7 @@ const ControlsPanel = ({
       </div>
 
       <div className="control-group">
-        <label>
-          Contrast <span className="value-label">({contrast})</span>
-        </label>
+        <label>Contrast <span className="value-label">({contrast})</span></label>
         <input
           type="range"
           min="-100"
@@ -98,7 +99,7 @@ const ControlsPanel = ({
         />
       </div>
 
-      {/* New Resize Controls */}
+      {/* Resize controls */}
       <div className="control-group">
         <label>Image Size</label>
         <select value={resizeMode} onChange={(e) => setResizeMode(e.target.value as typeof resizeMode)}>
@@ -110,69 +111,71 @@ const ControlsPanel = ({
       </div>
 
       {resizeMode !== 'original' && (
-  <>
-    {(resizeMode === 'fitWidth' || resizeMode === 'exact') && (
-      <div className="control-group">
-        <label>Target Width (px)</label>
-        <input
-          type="number"
-          min="1"
-          max="2000"
-          step="1"
-          value={targetWidth}
-          onChange={(e) => setTargetWidth(parseInt(e.target.value, 10) || 384)}
-        />
-      </div>
-    )}
-    {(resizeMode === 'fitHeight' || resizeMode === 'exact') && (
-      <div className="control-group">
-        <label>Target Height (px)</label>
-        <input
-          type="number"
-          min="1"
-          max="2000"
-          step="1"
-          value={targetHeight}
-          onChange={(e) => setTargetHeight(parseInt(e.target.value, 10) || 384)}
-        />
-      </div>
-    )}
-    <div className="slider-value" style={{ marginTop: 4, fontSize: '0.8rem', color: '#64748b' }}>
-      {resizeMode === 'fitWidth' && 'Height calculated automatically (preserves aspect ratio)'}
-      {resizeMode === 'fitHeight' && 'Width calculated automatically (preserves aspect ratio)'}
-      {resizeMode === 'exact' && 'Image will be stretched to exact dimensions'}
-    </div>
-  </>
-)}
+        <>
+          <div className="control-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label style={{ marginBottom: 0 }}>Unit</label>
+            <select
+              value={unit}
+              onChange={(e) => setUnit(e.target.value as typeof unit)}
+              style={{ width: 'auto', flex: 1 }}
+            >
+              <option value="px">Pixels (px)</option>
+              <option value="mm">Millimeters (mm)</option>
+            </select>
+          </div>
+
+          {(resizeMode === 'fitWidth' || resizeMode === 'exact') && (
+            <div className="control-group">
+              <label>Width ({unit})</label>
+              <input
+                type="number"
+                min={unit === 'px' ? '1' : '0.1'}
+                max={unit === 'px' ? '2000' : '250'}
+                step={unit === 'px' ? '1' : '0.1'}
+                value={displayWidth}
+                onChange={(e) => handleWidthChange(e.target.value)}
+              />
+            </div>
+          )}
+
+          {(resizeMode === 'fitHeight' || resizeMode === 'exact') && (
+            <div className="control-group">
+              <label>Height ({unit})</label>
+              <input
+                type="number"
+                min={unit === 'px' ? '1' : '0.1'}
+                max={unit === 'px' ? '2000' : '250'}
+                step={unit === 'px' ? '1' : '0.1'}
+                value={displayHeight}
+                onChange={(e) => handleHeightChange(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="slider-value" style={{ marginTop: 4, fontSize: '0.8rem', color: '#64748b' }}>
+            {resizeMode === 'fitWidth' && 'Height calculated automatically (preserves aspect ratio)'}
+            {resizeMode === 'fitHeight' && 'Width calculated automatically (preserves aspect ratio)'}
+            {resizeMode === 'exact' && 'Image will be stretched to exact dimensions'}
+            {unit === 'mm' && ' (1 mm ≈ 8 px)'}
+          </div>
+        </>
+      )}
 
       <div className="control-group checkbox-group">
         <label>Invert colors</label>
-        <input
-          type="checkbox"
-          checked={invert}
-          onChange={(e) => setInvert(e.target.checked)}
-        />
+        <input type="checkbox" checked={invert} onChange={(e) => setInvert(e.target.checked)} />
       </div>
 
+      {/* Buttons */}
       <div className="button-group">
-        <button className="btn btn-outline" onClick={onReset}>
-          ↻ Reset
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={onProcess}
-          disabled={processDisabled}
-        >
+        <button className="btn btn-outline" onClick={onReset}>↻ Reset</button>
+        <button className="btn btn-primary" onClick={onProcess} disabled={processDisabled}>
           {isProcessing ? 'Processing...' : 'Process'}
         </button>
       </div>
 
       <div className="button-group" style={{ marginTop: 12 }}>
-        <button
-          className="btn btn-primary"
-          onClick={onDownload}
-          disabled={downloadDisabled}
-        >
+        <button className="btn btn-primary" onClick={onDownload} disabled={downloadDisabled}>
           Download
         </button>
       </div>
@@ -191,15 +194,8 @@ const ControlsPanel = ({
         </button>
       </div>
 
-      {printError && (
-        <div className="print-error" style={{ marginTop: 8, color: '#ef4444', fontSize: '0.85rem' }}>
-          {printError}
-        </div>
-      )}
-
-      {isProcessing && (
-        <div className="processing-indicator">Rendering image, please wait...</div>
-      )}
+      {printError && <div className="print-error">{printError}</div>}
+      {isProcessing && <div className="processing-indicator">Rendering image, please wait...</div>}
     </div>
   );
 };

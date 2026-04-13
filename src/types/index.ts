@@ -1,4 +1,5 @@
 export type ResizeMode = 'original' | 'fitWidth' | 'fitHeight' | 'exact';
+export type SizeUnit = 'px' | 'mm';
 
 export interface ProcessingOptions {
   algorithm: 'floyd' | 'atkinson' | 'ordered' | 'threshold';
@@ -8,8 +9,8 @@ export interface ProcessingOptions {
   bayerSize: 2 | 4 | 8;
   invert: boolean;
   resizeMode: ResizeMode;
-  targetWidth: number;
-  targetHeight: number;
+  targetWidth: number; // always stored in pixels
+  targetHeight: number; // always stored in pixels
 }
 
 export interface ImageUploaderProps {
@@ -55,5 +56,6 @@ export interface ControlsPanelProps {
   setTargetWidth: (value: number) => void;
   targetHeight: number;
   setTargetHeight: (value: number) => void;
+  unit: SizeUnit;
+  setUnit: (value: SizeUnit) => void;
 }
-
